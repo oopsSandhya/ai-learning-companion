@@ -1,3 +1,4 @@
+
 import { useState } from 'react'
 
 interface QuizPageProps {
@@ -18,6 +19,8 @@ function QuizPage({ selectedText }: QuizPageProps) {
   const [selected, setSelected] = useState<{ [key: number]: string }>({})
   const [showScore, setShowScore] = useState(false)
 
+  const isLongTranscript = selectedText.length > 200
+
   const handleQuiz = async () => {
     if (!selectedText) return
     setLoading(true)
@@ -27,7 +30,7 @@ function QuizPage({ selectedText }: QuizPageProps) {
     setShowScore(false)
 
     try {
-      const response = await fetch('https://ai-learning-companion-1-w3hw.onrender.com/api/quiz', {
+      const response = await fetch('http://localhost:8000/api/quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: selectedText })
@@ -65,7 +68,7 @@ function QuizPage({ selectedText }: QuizPageProps) {
     setShowScore(true)
 
     try {
-      await fetch('https://ai-learning-companion-1-w3hw.onrender.com/api/quiz/result', {
+      await fetch('http://localhost:8000/api/quiz/result', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -110,9 +113,15 @@ function QuizPage({ selectedText }: QuizPageProps) {
     <div className="p-4 flex flex-col gap-4">
 
       <div className="bg-gray-800 rounded-lg p-3">
-        <p className="text-xs text-gray-400 mb-1">Selected Text</p>
+        <p className="text-xs text-gray-400 mb-1">
+          {isLongTranscript ? '📹 Video Transcript' : 'Selected Text'}
+        </p>
         <p className="text-sm text-white line-clamp-2">
-          {selectedText || 'Select any text on a webpage to get started...'}
+          {selectedText
+            ? isLongTranscript
+              ? '✅ Full video transcript loaded — click Generate Quiz to start'
+              : selectedText
+            : 'Select any text on a webpage to get started...'}
         </p>
       </div>
 
@@ -157,11 +166,9 @@ function QuizPage({ selectedText }: QuizPageProps) {
                 })}
               </div>
               {selected[qIndex] && (
-                <div className="mt-3 bg-yellow-900/30 border border-yellow-600/40 rounded-lg p-2">
-                  <p className="text-xs text-yellow-300">
-                    💡 {q.explanation}
-                  </p>
-                </div>
+                <p className="text-xs text-gray-400 mt-2">
+                  💡 {q.explanation}
+                </p>
               )}
             </div>
           ))}
@@ -169,26 +176,19 @@ function QuizPage({ selectedText }: QuizPageProps) {
           {allAnswered && !showScore && (
             <button
               onClick={handleShowScore}
-              className="w-full bg-blue-600 hover:bg-blue-700
+              className="w-full bg-yellow-600 hover:bg-yellow-700
                 text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
-              📊 See My Score
+              🎯 Show My Score
             </button>
           )}
 
           {showScore && (
-            <div className="bg-gray-800 border border-blue-500/40 rounded-lg p-4 text-center">
+            <div className="bg-gray-800 rounded-lg p-4 text-center">
               <p className="text-2xl font-bold text-white">
-                {score} / {questions.length}
+                {score}/{questions.length}
               </p>
-              <p className="text-blue-400 text-sm mt-1">{getScoreEmoji()}</p>
-              <button
-                onClick={handleQuiz}
-                className="mt-3 bg-green-600 hover:bg-green-700
-                  text-white text-sm py-1.5 px-4 rounded-lg transition-colors"
-              >
-                🔄 Try Again
-              </button>
+              <p className="text-sm text-gray-400 mt-1">{getScoreEmoji()}</p>
             </div>
           )}
         </div>

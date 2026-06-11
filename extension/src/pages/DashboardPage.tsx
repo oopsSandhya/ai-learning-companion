@@ -32,7 +32,7 @@ function DashboardPage() {
   const fetchDashboard = async () => {
     setLoading(true)
     try {
-      const response = await fetch('https://ai-learning-companion-1-w3hw.onrender.com/api/dashboard')
+      const response = await fetch('http://localhost:8000/api/dashboard')
       if (!response.ok) throw new Error('Failed to fetch')
       const json = await response.json()
       setData(json)

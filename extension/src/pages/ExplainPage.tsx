@@ -17,9 +17,8 @@ function ExplainPage({ selectedText }: ExplainPageProps) {
     setError('')
     setResult('')
     setPlaying(false)
-
     try {
-      const response = await fetch('https://ai-learning-companion-1-w3hw.onrender.com/api/explain', {
+      const response = await fetch('http://localhost:8000/api/explain', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: selectedText })
@@ -43,15 +42,23 @@ function ExplainPage({ selectedText }: ExplainPageProps) {
     }
   }
 
+  // Check karo transcript hai ya normal selected text
+  const isLongTranscript = selectedText.length > 200
+
   return (
     <div className="p-4 flex flex-col gap-4">
       <div className="bg-gray-800 rounded-lg p-3">
-        <p className="text-xs text-gray-400 mb-1">Selected Text</p>
+        <p className="text-xs text-gray-400 mb-1">
+          {isLongTranscript ? '📹 Video Transcript' : 'Selected Text'}
+        </p>
         <p className="text-sm text-white">
-          {selectedText || 'Select any text on a webpage to get started...'}
+          {selectedText
+            ? isLongTranscript
+              ? '✅ Full video transcript loaded — click Explain to analyze'
+              : selectedText
+            : 'Select any text on a webpage to get started...'}
         </p>
       </div>
-
       <button
         onClick={handleExplain}
         disabled={!selectedText || loading}
@@ -59,11 +66,9 @@ function ExplainPage({ selectedText }: ExplainPageProps) {
           text-white font-medium py-2 px-4 rounded-lg transition-colors">
         {loading ? '⏳ Explaining...' : '💡 Explain This'}
       </button>
-
       {error && (
         <p className="text-red-400 text-xs">{error}</p>
       )}
-
       <div className="bg-gray-800 rounded-lg p-3 min-h-[200px]">
         <p className="text-xs text-gray-400 mb-2">Explanation</p>
         {result && (

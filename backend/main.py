@@ -10,10 +10,12 @@ from sqlalchemy.orm import sessionmaker
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, NoTranscriptFound
 from datetime import datetime
 import os
 import json
 import logging
+import re
 
 logging.basicConfig(
     level=logging.INFO,
@@ -95,23 +97,87 @@ class QuizResultRequest(BaseModel):
     score: int
     total: int
 
+class TranscriptRequest(BaseModel):
+    video_url: str
+
+def extract_video_id(url: str):
+    patterns = [
+        r"(?:v=)([a-zA-Z0-9_-]{11})",
+        r"(?:youtu\.be/)([a-zA-Z0-9_-]{11})",
+        r"(?:embed/)([a-zA-Z0-9_-]{11})",
+        r"(?:shorts/)([a-zA-Z0-9_-]{11})",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+    return None
+
 @app.get("/")
 def health_check():
     logger.info("Health check called")
     return {"status": "ok", "message": "AI Learning Companion API is running"}
 
+@app.post("/api/transcript")
+async def get_transcript(body: TranscriptRequest):
+    try:
+        video_id = extract_video_id(body.video_url)
+        if not video_id:
+            return JSONResponse(status_code=400, content={"error": "Invalid YouTube URL"})
+
+        logger.info(f"Transcript request for video_id: {video_id}")
+
+        fetcher = YouTubeTranscriptApi()
+
+        # Sabse pehle available transcripts list karo
+        transcript_list = fetcher.list(video_id)
+
+        # Koi bhi language ka transcript lo — jo pehle mile
+        try:
+            transcript = transcript_list.find_a_transcript(
+                ['en', 'hi', 'en-US', 'en-GB', 'en-IN', 'hi-IN']
+            )
+        except Exception:
+            # Agar manually listed nahi mila toh auto-generated lo
+            try:
+                transcript = transcript_list.find_generated_transcript(
+                    ['en', 'hi', 'en-US', 'en-GB', 'en-IN']
+                )
+            except Exception:
+                # Last resort — jo bhi pehli transcript mile
+                transcript = next(iter(transcript_list))
+
+        fetched = transcript.fetch()
+        full_text = " ".join([entry.text for entry in fetched])
+
+        logger.info(f"Transcript fetched: {len(full_text)} chars")
+        return {"transcript": full_text, "video_id": video_id}
+
+    except TranscriptsDisabled:
+        logger.warning(f"Transcripts disabled for URL: {body.video_url}")
+        return JSONResponse(status_code=404, content={"error": "Transcripts are disabled for this video"})
+    except NoTranscriptFound:
+        logger.warning(f"No transcript found for URL: {body.video_url}")
+        return JSONResponse(status_code=404, content={"error": "No transcript found for this video"})
+    except Exception as e:
+        logger.error(f"Transcript error: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
 @app.post("/api/explain")
 @limiter.limit("10/minute")
 async def explain_text(request: Request, body: TextRequest):
     try:
-        logger.info(f"Explain request: {len(body.text)} chars")
+        # Transcript bahut lamba ho sakta hai — sirf pehle 3000 chars lo
+        trimmed_text = body.text[:3000]
+        logger.info(f"Explain request: {len(trimmed_text)} chars")
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{
                 "role": "user",
-                "content": f"""Explain the following text in simple, easy-to-understand language.
+                "content": f"""You are a helpful assistant. Explain the following text in simple easy-to-understand English language only.
+                Even if the text is in Hindi or any other language, always respond in English.
                 Use bullet points and keep it concise.
-                Text: {body.text}"""
+                Text: {trimmed_text}"""
             }]
         )
         return {"result": response.choices[0].message.content}
@@ -123,14 +189,17 @@ async def explain_text(request: Request, body: TextRequest):
 @limiter.limit("10/minute")
 async def summary_text(request: Request, body: TextRequest):
     try:
-        logger.info(f"Summary request: {len(body.text)} chars")
+        # Transcript bahut lamba ho sakta hai — sirf pehle 3000 chars lo
+        trimmed_text = body.text[:3000]
+        logger.info(f"Summary request: {len(trimmed_text)} chars")
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{
                 "role": "user",
-                "content": f"""Summarize the following text in 3-5 bullet points.
+                "content": f"""You are a helpful assistant. Summarize the following text in 3-5 bullet points in English language only.
+                Even if the text is in Hindi or any other language, always respond in English.
                 Be concise and capture the main ideas.
-                Text: {body.text}"""
+                Text: {trimmed_text}"""
             }]
         )
         return {"result": response.choices[0].message.content}
@@ -142,12 +211,15 @@ async def summary_text(request: Request, body: TextRequest):
 @limiter.limit("10/minute")
 async def quiz_text(request: Request, body: TextRequest):
     try:
-        logger.info(f"Quiz request: {len(body.text)} chars")
+        # Transcript bahut lamba ho sakta hai — sirf pehle 3000 chars lo
+        trimmed_text = body.text[:3000]
+        logger.info(f"Quiz request: {len(trimmed_text)} chars")
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{
                 "role": "user",
-                "content": f"""You are a quiz generator. Generate exactly 3 multiple choice questions based on the text below.
+                "content": f"""You are a quiz generator. Generate exactly 3 multiple choice questions in English only based on the text below.
+                Even if the text is in Hindi or any other language, always generate questions and answers in English.
 
 IMPORTANT: Return ONLY a valid JSON object. No explanation, no markdown, no code fences. Just raw JSON.
 
@@ -163,7 +235,7 @@ Return this exact structure:
   ]
 }}
 
-Text: {body.text}"""
+Text: {trimmed_text}"""
             }]
         )
         raw = response.choices[0].message.content.strip()
@@ -177,26 +249,6 @@ Text: {body.text}"""
     except Exception as e:
         logger.error(f"Quiz error: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
-
-@app.post("/api/quiz/result")
-async def save_quiz_result(request: Request, body: QuizResultRequest):
-    try:
-        db = SessionLocal()
-        result = QuizResult(
-            selected_text=body.selected_text,
-            score=body.score,
-            total=body.total
-        )
-        db.add(result)
-        db.commit()
-        db.refresh(result)
-        db.close()
-        logger.info(f"Quiz result saved: {body.score}/{body.total}")
-        return {"id": result.id, "message": "Quiz result saved!"}
-    except Exception as e:
-        logger.error(f"Save quiz result error: {e}")
-        return JSONResponse(status_code=500, content={"error": str(e)})
-
 @app.get("/api/quiz/results")
 async def get_quiz_results():
     try:
@@ -277,7 +329,7 @@ async def get_dashboard():
         total_notes = db.query(Note).count()
         total_quizzes = db.query(QuizResult).count()
         avg_score = db.query(QuizResult).all()
-        
+
         if avg_score:
             average = sum(r.score for r in avg_score) / len(avg_score)
         else:
@@ -286,11 +338,11 @@ async def get_dashboard():
         recent_notes = db.query(Note).order_by(
             Note.created_at.desc()
         ).limit(5).all()
-        
+
         recent_quizzes = db.query(QuizResult).order_by(
             QuizResult.created_at.desc()
         ).limit(5).all()
-        
+
         db.close()
         return {
             "stats": {

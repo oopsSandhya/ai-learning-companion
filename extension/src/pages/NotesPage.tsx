@@ -20,7 +20,7 @@ function NotesPage({ selectedText }: NotesPageProps) {
 
   const fetchNotes = async () => {
     try {
-      const response = await fetch('https://ai-learning-companion-1-w3hw.onrender.com/api/notes')
+      const response = await fetch('http://localhost:8000/api/notes')
       const data = await response.json()
       setNotes(data.notes)
     } catch (err) {
@@ -32,16 +32,20 @@ function NotesPage({ selectedText }: NotesPageProps) {
     fetchNotes()
   }, [])
 
+  const isLongTranscript = selectedText.length > 200
+
   const handleSave = async () => {
     if (!noteText.trim()) return
     setLoading(true)
-
     try {
-      await fetch('https://ai-learning-companion-1-w3hw.onrender.com/api/notes', {
+      await fetch('http://localhost:8000/api/notes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          selected_text: selectedText || 'No text selected',
+          // YouTube transcript ke liye sirf label save karo, pura text nahi
+          selected_text: isLongTranscript
+            ? '📹 YouTube Video Transcript'
+            : selectedText || 'No text selected',
           note_text: noteText
         })
       })
@@ -56,9 +60,7 @@ function NotesPage({ selectedText }: NotesPageProps) {
 
   const handleDelete = async (id: number) => {
     try {
-      await fetch(`https://ai-learning-companion-1-w3hw.onrender.com/api/notes/${id}`, {
-        method: 'DELETE'
-      })
+      await fetch(`http://localhost:8000/api/notes/${id}`, { method: 'DELETE' })
       fetchNotes()
     } catch (err) {
       console.log('Error deleting note:', err)
@@ -97,9 +99,7 @@ function NotesPage({ selectedText }: NotesPageProps) {
       </button>
 
       <div className="flex flex-col gap-2">
-        <p className="text-xs text-gray-400">
-          Saved Notes ({notes.length})
-        </p>
+        <p className="text-xs text-gray-400">Saved Notes ({notes.length})</p>
         {notes.length === 0 && (
           <p className="text-sm text-gray-500">No notes saved yet...</p>
         )}
