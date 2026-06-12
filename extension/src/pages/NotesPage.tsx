@@ -3,6 +3,7 @@ import { speakText, stopSpeech } from '../utils/speech'
 
 interface NotesPageProps {
   selectedText: string
+  _isYouTube: boolean
 }
 
 interface Note {
@@ -12,7 +13,7 @@ interface Note {
   created_at: string
 }
 
-function NotesPage({ selectedText }: NotesPageProps) {
+function NotesPage({ selectedText}: NotesPageProps) {
   const [noteText, setNoteText] = useState<string>('')
   const [notes, setNotes] = useState<Note[]>([])
   const [loading, setLoading] = useState<boolean>(false)

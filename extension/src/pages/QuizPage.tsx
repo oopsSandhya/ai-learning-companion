@@ -3,6 +3,7 @@ import { useState } from 'react'
 
 interface QuizPageProps {
   selectedText: string
+  _isYouTube: boolean
 }
 
 interface Question {

@@ -3,9 +3,10 @@ import { speakText, stopSpeech } from '../utils/speech'
 
 interface SummaryPageProps {
   selectedText: string
+  _isYouTube: boolean
 }
 
-function SummaryPage({ selectedText }: SummaryPageProps) {
+function SummaryPage({ selectedText}: SummaryPageProps) {
   const [result, setResult] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
