@@ -1,4 +1,6 @@
+Puri updated README — copy karke replace karo:
 
+markdown
 # 🧠 AI Learning Companion
 
 ### *Your AI study buddy that never sleeps.*
@@ -8,8 +10,10 @@
 ![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Groq](https://img.shields.io/badge/Groq-AI-orange?style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![Render](https://img.shields.io/badge/Deployed-Render-46E3B7?style=for-the-badge)
 
 ---
@@ -31,132 +35,235 @@ Whether you're reading a complex article, watching a YouTube tutorial in Hindi o
 
 ## ✨ Features
 
-| Feature | Description |
-|---------|-------------|
-| 💡 **Auto Explain** | Opens on any page → instantly explains content. No button click needed. |
-| 📝 **Summary** | 3-5 bullet point summary of any content |
-| 🧪 **Quiz** | Auto-generated MCQ quiz with score tracking |
-| 📚 **Notes** | Save personal notes while learning |
-| 📊 **Insights** | Dashboard with learning stats & quiz history |
-| 🎬 **YouTube Transcript** | Auto-fetches transcript from ANY YouTube video in ANY language → explains in English |
+|
+ Feature 
+|
+ Description 
+|
+|
+---------
+|
+-------------
+|
+|
+ 💡 
+**
+Auto Explain
+**
+|
+ Opens on any page → instantly explains content. No button click needed. 
+|
+|
+ 📝 
+**
+Summary
+**
+|
+ 3-5 bullet point summary of any content 
+|
+|
+ 🧪 
+**
+Quiz
+**
+|
+ Auto-generated MCQ quiz with score tracking 
+|
+|
+ 📚 
+**
+Notes
+**
+|
+ Save personal notes while learning 
+|
+|
+ 📊 
+**
+Insights
+**
+|
+ Dashboard with learning stats & quiz history 
+|
+|
+ 🎬 
+**
+YouTube Transcript
+**
+|
+ Auto-fetches transcript from ANY YouTube video in ANY language → explains in English 
+|
+|
+ 🔊 
+**
+Text to Speech
+**
+|
+ Listen to explanations and summaries 
+|
+|
+ 📋 
+**
+Copy
+**
+|
+ One-click copy of AI responses 
+|
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| **Extension Frontend** | React + TypeScript + Vite + Tailwind CSS | Chrome Extension UI |
-| **Backend** | Python + FastAPI | REST API server |
-| **AI Model** | Groq — Llama 3.3 70B | Explain, Summary, Quiz generation |
-| **YouTube** | youtube-transcript-api | Fetch video transcripts |
-| **Database** | PostgreSQL + SQLAlchemy | Store notes & quiz results |
-| **Rate Limiting** | SlowAPI | Prevent API abuse |
-| **Deployment** | Render (Backend) | Live backend hosting |
-| **Containerization** | Docker + Docker Compose | Easy local setup |
+|
+ Layer 
+|
+ Technology 
+|
+ Purpose 
+|
+|
+-------
+|
+-----------
+|
+---------
+|
+|
+**
+Extension Frontend
+**
+|
+ React + TypeScript + Vite + Tailwind CSS 
+|
+ Chrome Extension UI 
+|
+|
+**
+Backend
+**
+|
+ Python + FastAPI + Uvicorn 
+|
+ REST API server 
+|
+|
+**
+AI Model
+**
+|
+ Groq — Llama 3.3 70B 
+|
+ Explain, Summary, Quiz generation 
+|
+|
+**
+YouTube
+**
+|
+ youtube-transcript-api 
+|
+ Fetch video transcripts in any language 
+|
+|
+**
+Database
+**
+|
+ PostgreSQL + SQLAlchemy 
+|
+ Store notes & quiz results 
+|
+|
+**
+Rate Limiting
+**
+|
+ SlowAPI 
+|
+ Prevent API abuse 
+|
+|
+**
+Chrome APIs
+**
+|
+ Manifest V3 + Service Worker 
+|
+ Extension background tasks 
+|
+|
+**
+Deployment
+**
+|
+ Render (Backend) 
+|
+ Live backend hosting 
+|
+|
+**
+Containerization
+**
+|
+ Docker + Docker Compose 
+|
+ Easy local setup 
+|
 
 ---
 
 ## 📁 Project Structure
 ai-learning-companion/
-
 │
-
-├── 📂 backend/                      # Python FastAPI Backend
-
-│   ├── main.py                      # All API endpoints
-
-│   ├── requirements.txt             # Python dependencies
-
-│   ├── Dockerfile                   # Docker config for backend
-
-│   └── .env.example                 # Environment variables template
-
+├── 📂 backend/                   # Python FastAPI Backend
+│ ├── main.py                     # All API endpoints
+│ ├── requirements.txt            # Python dependencies (exact versions pinned)
+│ ├── Dockerfile                  # Docker config for backend
+│ └── .env.example                # Environment variables template
 │
-
-├── 📂 extension/                    # Chrome Extension (React + TS)
-
-│   ├── 📂 src/
-
-│   │   ├── App.tsx                  # Root component — handles YouTube detection
-
-│   │   ├── main.tsx                 # Entry point
-
-│   │   ├── index.css                # Global styles
-
-│   │   │
-
-│   │   ├── 📂 pages/
-
-│   │   │   ├── ExplainPage.tsx      # Auto-explain with AI
-
-│   │   │   ├── SummaryPage.tsx      # Bullet point summary
-
-│   │   │   ├── QuizPage.tsx         # MCQ quiz generator
-
-│   │   │   ├── NotesPage.tsx        # Personal notes manager
-
-│   │   │   └── DashboardPage.tsx    # Learning insights & stats
-
-│   │   │
-
-│   │   ├── 📂 components/
-
-│   │   │   └── Navbar.tsx           # Tab navigation
-
-│   │   │
-
-│   │   ├── 📂 background/
-
-│   │   │   └── index.ts             # Chrome service worker
-
-│   │   │
-
-│   │   ├── 📂 content/
-
-│   │   │   └── index.ts             # Content script — captures selected text
-
-│   │   │
-
-│   │   ├── 📂 utils/
-
-│   │   │   └── speech.ts            # Text-to-speech utility
-
-│   │   │
-
-│   │   └── 📂 types/
-
-│   │       └── index.ts             # TypeScript type definitions
-
-│   │
-
-│   ├── 📂 public/
-
-│   │   ├── manifest.json            # Chrome Extension manifest v3
-
-│   │   ├── favicon.svg              # Extension favicon
-
-│   │   └── icons.svg                # Extension icons
-
-│   │
-
-│   ├── package.json
-
-│   ├── vite.config.ts
-
-│   ├── tailwind.config.js
-
-│   ├── tsconfig.json
-
-│   └── Dockerfile
-
+├── 📂 extension/                 # Chrome Extension (React + TypeScript)
+│ ├── 📂 src/
+│ │ ├── App.tsx                   # Root component — handles YouTube detection
+│ │ ├── main.tsx                  # Entry point
+│ │ ├── index.css                 # Global styles
+│ │ │
+│ │ ├── 📂 pages/
+│ │ │ ├── ExplainPage.tsx         # Auto-explain with AI
+│ │ │ ├── SummaryPage.tsx         # Bullet point summary
+│ │ │ ├── QuizPage.tsx            # MCQ quiz generator
+│ │ │ ├── NotesPage.tsx           # Personal notes manager
+│ │ │ └── DashboardPage.tsx       # Learning insights & stats
+│ │ │
+│ │ ├── 📂 components/
+│ │ │ └── Navbar.tsx              # Tab navigation
+│ │ │
+│ │ ├── 📂 background/
+│ │ │ └── index.ts                # Chrome service worker
+│ │ │
+│ │ ├── 📂 content/
+│ │ │ └── index.ts                 # Content script — captures selected text
+│ │ │
+│ │ ├── 📂 utils/
+│ │ │ └── speech.ts                # Text-to-speech utility
+│ │ │
+│ │ └── 📂 types/
+│ │ └── index.ts                   # TypeScript type definitions
+│ │
+│ ├── 📂 public/
+│ │ ├── manifest.json              # Chrome Extension manifest v3
+│ │ ├── favicon.svg                # Extension favicon
+│ │ └── icons.svg                  # Extension icons
+│ │
+│ ├── package.json
+│ ├── vite.config.ts
+│ ├── tailwind.config.js
+│ ├── tsconfig.json
+│ └── Dockerfile
 │
-
-├── docker-compose.yml               # Run entire stack with one command
-
+├── docker-compose.yml             # Run entire stack with one command
 ├── .gitignore
-
 └── README.md
+
 
 ---
 
@@ -319,3 +426,12 @@ Made with 💜 by [Sandhya](https://github.com/sandhyacgu)
 *Learn smarter. Not harder.*
 
 </div>
+Save karo phir:
+
+powershell
+cd C:\Users\HP\Projects\ai-learning-companion
+git add README.md
+git commit -m "docs: add TypeScript + missing tech stack items"
+git push origin main
+🚀
+
